@@ -1,4 +1,4 @@
-# searchpypi.py - Opens several search results
+# searchpypi.py - Opens several search results on pypi.org
 
 import requests
 import sys
@@ -7,17 +7,21 @@ import bs4
 
 print("Searching...")
 
-search_term = " ".join(sys.argv[1:])
-
 res = requests.get(
-    "https://html.duckduckgo.com/html/",
-    params={"q": search_term},
+    "https://pypi.org/search/?q=" + " ".join(sys.argv[1:])
 )
 
 res.raise_for_status()
 
-# Create BeautifulSoup object
+# Retrieve top search result links.
 soup = bs4.BeautifulSoup(res.text, "html.parser")
 
-# Temporary: inspect the HTML
-print(soup.prettify()[:5000])
+link_elems = soup.select(".package-snippet")
+
+# Open a browser tab for each result.
+num_open = min(5, len(link_elems))
+
+for i in range(num_open):
+    url_to_open = "https://pypi.org" + link_elems[i].get("href")
+    print("Opening", url_to_open)
+    webbrowser.open(url_to_open)
